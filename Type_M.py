@@ -1,22 +1,25 @@
 import keyboard as kb
-import random
+import random ,json
 from time import time, sleep
 from threading import Thread
 
 
 def showLeaderBoard():
-	global all_players
+	global jsondata
 	sleep(2)
 	print()
 	print('NAME\t\tWORDS\t\tTIME(sec)\tWPM')
 	print('='*60)
-	for p1 in all_players:
-		print('{}\t\t{}\t\t{}\t\t{}'.format(p1.name,p1.words,p1.playtime,p1.wpm))
+
+	sorted_list=sorted(jsondata,key=lambda key : jsondata[key]['wpm'] ,reverse=True)
+
+	for key in sorted_list:
+		print('{}\t\t{}\t\t{}\t\t{}'.format(jsondata[key]['name'],jsondata[key]['words'],jsondata[key]['time'],jsondata[key]['wpm']))
 	
 
 
 def monitorForQuit(p1):
-	global end_flag,all_players
+	global end_flag
 	while(True):
 		if(kb.is_pressed('ctrl+q')):
 			#print('User tried to quit')
@@ -26,15 +29,22 @@ def monitorForQuit(p1):
 	p1.playtime=int(p1.end_time-p1.start_time)
 	p1.wpm=p1.words*60//p1.playtime
 
+	# Write the necessary data of current player to jsondata.
+
+	jsondata["P"+str(players)]['name']=p1.name
+	jsondata["P"+str(players)]['words']=p1.words
+	jsondata["P"+str(players)]['time']=p1.playtime
+	jsondata["P"+str(players)]['wpm']=p1.wpm
+
 	showLeaderBoard()		
 
+	print('\nHIT ENTER')
 
 def getUserInput(p1):
 	global end_flag
 	print('Start typing the paragraph shown to you. Press Ctrl+Q to exit')
 	p1.start_time=time()
-	f=open('paragraph.txt','r')
-	content=f.readlines()
+	
 
 	while(True):
 		
@@ -68,17 +78,37 @@ class Player:
 		self.end_time=0
 		self.wpm=0
 
-
-all_players=[]
 game_run=1
+para_g=open('paragraph.txt','r')
+content=para_g.readlines()
+
+
+# Read the JSON data that is already saved.
+fr=''										# File read pointer
+try:
+	fr=open('scorecard.json','r')
+	jsondata=json.loads(fr.read())
+except:
+	fr=open('scorecard.json','w+')			# If scorecard.json doesn't exit, create it.
+	fr.write("{}")							# Write the basic JSON structure of {} to it
+	fr.seek(0)								# Move the pointer to SOF.
+	jsondata=json.loads(fr.read())			# Read the data from it.
+
+players=len(jsondata)						# Total number of players present in scorecard
+fr.close()
+
+# Type master game begins here...
 while(game_run):
 
 	end_flag=0
 
-	player=input('Enter your name : ')
-	p1=Player(player)
-	all_players.append(p1)
+	player=input('Enter your name : ')			#get name input here 	
+	p1=Player(player)                       
 	
+	players+=1									# Increment players, as a new player will play the game
+	jsondata['P'+str(players)]={}				# Create empty dictionary for the new player
+
+
 	t1=Thread(target=getUserInput,args=(p1,))
 	t1.start()
 
@@ -103,3 +133,13 @@ while(game_run):
 		print('Game will end')
 		break
 	print()
+
+para_g.close()
+
+# Save the stats of all the players.
+
+fsw=open('scorecard.json','w')					# File write pointer
+json.dump(jsondata,fsw,indent=4)
+fsw.close()
+
+print('Data saved successfully.')
