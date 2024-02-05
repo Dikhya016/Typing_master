@@ -2,14 +2,15 @@ import keyboard as kb
 import random ,json
 from time import time, sleep
 from threading import Thread
+from colorama import  Fore
 
 
 def showLeaderBoard():
 	global jsondata
 	sleep(2)
 	print()
-	print('NAME\t\tWORDS\t\tTIME(sec)\tWPM')
-	print('='*60)
+	print(Fore.GREEN+'NAME\t\tWORDS\t\tTIME(sec)\tWPM'+Fore.RESET)
+	print(Fore.RED+'='*60+Fore.RESET)
 
 	sorted_list=sorted(jsondata,key=lambda key : jsondata[key]['wpm'] ,reverse=True)
 
@@ -54,8 +55,8 @@ def getUserInput(p1):
 
 		# Display the paragraph to the user.
 		current_sentence=random.choice(content).strip()
-		
-		print(current_sentence)
+		print()
+		print(Fore.BLUE+current_sentence+Fore.RESET)
 
 		# Get the user input.
 		user_inp=input()
