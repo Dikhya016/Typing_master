@@ -103,7 +103,7 @@ while(game_run):
 
 	end_flag=0
 
-	player=input('Enter your name : ')			#get name input here 	
+	player=input(Fore.MAGENTA+'ENTER YOUR NAME : '+Fore.RESET)			#get name input here 	
 	p1=Player(player)                       
 	
 	players+=1									# Increment players, as a new player will play the game
@@ -121,9 +121,9 @@ while(game_run):
 	t2.join()
 
 	print()
-	print('1. Play another game')
+	print(Fore.YELLOW+'1. Play another game')
 	print('2. Quit game')
-	option=input('Enter your option : ')
+	option=input('Enter your option : '+Fore.RESET)
 
 	if(option=='2'):
 		game_run=0
